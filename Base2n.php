@@ -1,19 +1,28 @@
 <?php
 /**
- * FixedBitEncoding
+ * Binary-to-text PHP Utilities
  *
- * @author Andre DeMarre
- * @package FixedBitEncoding
+ * @package     binary-to-text-php
+ * @link        https://github.com/ademarre/binary-to-text-php
+ * @author      Andre DeMarre
+ * @copyright   2009-2013 Andre DeMarre
+ * @license     http://opensource.org/licenses/MIT  MIT
  */
 
 /**
- * The FixedBitEncoding class is for binary to text conversion. It 
- * employs a generalized form of the algorithms used by many encoding 
- * schemes that use a fixed number of bits to encode each character.
+ * Class for binary-to-text encoding with a base of 2^n
  *
- * @package FixedBitEncoding
+ * The Base2n class is for binary-to-text conversion. It employs a 
+ * generalization of the algorithms used by many encoding schemes that 
+ * use a fixed number of bits to encode each character. In other words, 
+ * the base is a power of 2.
+ *
+ * Earlier versions of this class were named 
+ * FixedBitNotation and FixedBitEncoding.
+ *
+ * @package binary-to-text-php
  */
-class FixedBitEncoding
+class Base2n
 {
     protected $_chars;
     protected $_bitsPerCharacter;
@@ -33,22 +42,24 @@ class FixedBitEncoding
      * @param   boolean $rightPadFinalBits  How to encode last character
      * @param   boolean $padFinalGroup      Add padding to end of encoded output
      * @param   string  $padCharacter       Character to use for padding
+     *
+     * @throws  InvalidArgumentException    for incompatible parameters
      */
     public function __construct(
         $bitsPerCharacter, 
-        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-,', 
+        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_', 
         $caseSensitive = TRUE, $rightPadFinalBits = FALSE, 
         $padFinalGroup = FALSE, $padCharacter = '=')
     {
         // Ensure validity of $chars
         if (!is_string($chars) || ($charLength = strlen($chars)) < 2) {
-            throw new Exception('$chars must be a string of at least two characters');
+            throw new InvalidArgumentException('$chars must be a string of at least two characters');
         }
 
         // Ensure validity of $padCharacter
         if ($padFinalGroup) {
             if (!is_string($padCharacter) || !isset($padCharacter[0])) {
-                throw new Exception('$padCharacter must be a string of one character');
+                throw new InvalidArgumentException('$padCharacter must be a string of one character');
             }
 
             if ($caseSensitive) {
@@ -58,18 +69,18 @@ class FixedBitEncoding
             }
 
             if ($padCharFound !== FALSE) {
-                throw new Exception('$padCharacter can not be a member of $chars');
+                throw new InvalidArgumentException('$padCharacter can not be a member of $chars');
             }
         }
 
         // Ensure validity of $bitsPerCharacter
         if (!is_int($bitsPerCharacter)) {
-            throw new Exception('$bitsPerCharacter must be an integer');
+            throw new InvalidArgumentException('$bitsPerCharacter must be an integer');
         }
 
         if ($bitsPerCharacter < 1) {
             // $bitsPerCharacter must be at least 1
-            throw new Exception('$bitsPerCharacter can not be less than 1');
+            throw new InvalidArgumentException('$bitsPerCharacter can not be less than 1');
 
         } elseif ($charLength < 1 << $bitsPerCharacter) {
             // Character length of $chars is too small for $bitsPerCharacter
@@ -82,13 +93,14 @@ class FixedBitEncoding
             }
 
             $radix >>= 1;
-            throw new Exception('$bitsPerCharacter can not be more than ' . $bitsPerCharacter 
-                                . ' given $chars length of ' . $charLength 
-                                . ' (max radix ' . $radix . ')');
+            throw new InvalidArgumentException(
+                    '$bitsPerCharacter can not be more than ' . $bitsPerCharacter 
+                  . ' given $chars length of ' . $charLength 
+                  . ' (max radix ' . $radix . ')');
 
         } elseif ($bitsPerCharacter > 8) {
             // $bitsPerCharacter must not be greater than 8
-            throw new Exception('$bitsPerCharacter can not be greater than 8');
+            throw new InvalidArgumentException('$bitsPerCharacter can not be greater than 8');
 
         } else {
             $radix = 1 << $bitsPerCharacter;
