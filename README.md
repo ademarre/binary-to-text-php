@@ -1,9 +1,9 @@
 Binary-to-Text Utilities for PHP
 =================================
 
-The only class in this repository right now is **Base2n**.
+For now, the only class in this repository is **Base2n**.
 
-Base2n is for binary-to-text conversion with arbitrary encoding schemes that represent binary data in a base 2^n notation. It can handle non-standard variants of many standard encoding schemes such as [Base64][base64] and [Base32][base32]. Most binary-to-text encoding schemes use a fixed number of bits of binary data to generate each encoded character. Such schemes generalize to a single algorithm, implemented here.
+Base2n is for binary-to-text conversion with arbitrary encoding schemes that represent binary data in a base 2<sup>n</sup> notation. It can handle non-standard variants of many standard encoding schemes such as [Base64][base64] and [Base32][base32]. Many binary-to-text encoding schemes use a fixed number of bits of binary data to generate each encoded character. Such schemes generalize to a single algorithm, implemented here.
 
 [rfc4648base64]:    http://tools.ietf.org/html/rfc4648#section-4 "RFC 4648 Base64 Specification"
 [rfc4648base32]:    http://tools.ietf.org/html/rfc4648#section-6 "RFC 4648 Base32 Specification"
@@ -71,6 +71,13 @@ Examples
 --------
 
 PHP does not provide any Base32 encoding functions. By setting <code>$bitsPerCharacter</code> to 5 and specifying your desired alphabet in <code>$chars</code>, you can handle any variant of Base32:
+
+```php
+// RFC 4648 base32 alphabet; case-insensitive
+$base32 = new Base2n(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', FALSE, TRUE, TRUE);
+$encoded = $base32->encode('encode this');
+// MVXGG33EMUQHI2DJOM======
+```
 
 ```php
 // RFC 4648 base32hex alphabet
@@ -230,7 +237,7 @@ $encoded = str_replace(array('+', '/', '='), array('-', '_', ''), base64_encode(
 [rfc4648base64url]: http://tools.ietf.org/html/rfc4648#page-7 "Modified Base64 for URLs"
 
 
-Native functions are a little more cumbersome when every position in the alphabet has changed...
+Native functions are a little more cumbersome when every position in the alphabet has changed:
 ```php
 // Decode the salt and digest from a Bcrypt hash
 
@@ -238,30 +245,28 @@ $hash = '$2y$14$i5btSOiulHhaPHPbgNUGdObga/GC.AVG/y5HHY1ra7L0C9dpCaw8u';
 $encodedSalt    = substr($hash, 7, 22);
 $encodedDigest  = substr($hash, 29, 31);
 
-// using Base2n...
+// Using Base2n...
 $bcrypt64 = new Base2n(6, './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', TRUE, TRUE);
 $rawSalt    = $bcrypt64->decode($encodedSalt);   // 16 bytes
 $rawDigest  = $bcrypt64->decode($encodedDigest); // 23 bytes
-//todo
 
-// using native functions...
+// Using native functions...
 $bcrypt64alphabet = str_split('./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
 $base64alphabet   = str_split('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/');
 $charmap = array_combine($bcrypt64alphabet, $base64alphabet);
-$rawSalt    = strtr($encodedSalt,   $charmap); // 16 bytes
-$rawDigest  = strtr($encodedDigest, $charmap); // 23 bytes
-//todo
+$rawSalt    = base64_decode(strtr($encodedSalt,   $charmap)); // 16 bytes
+$rawDigest  = base64_decode(strtr($encodedDigest, $charmap)); // 23 bytes
 ```
 
-You can encode and decode hexadecimal with [bin2hex()][bin2hex] and [pack()][pack]:
+You can encode and decode hexadecimal with <code>[bin2hex()][bin2hex]</code> and <code>[pack()][pack]</code>:
 
 ```php
-// hexadecimal with Base2n...
+// Hexadecimal with Base2n...
 $hexadecimal = new Base2n(4);
 $encoded = $hexadecimal->encode('encode this'); // 656e636f64652074686973
 $decoded = $hexadecimal->decode($encoded);      // encode this
 
-// it's better to use native functions...
+// It's better to use native functions...
 $encoded = bin2hex('encode this'); // 656e636f64652074686973
 $decoded = pack('H*', $encoded);   // encode this
 // As of PHP 5.4 you can use hex2bin() instead of pack()
