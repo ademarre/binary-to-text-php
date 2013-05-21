@@ -3,7 +3,7 @@ Binary-to-Text Utilities for PHP
 
 For now, the only class in this repository is **Base2n**.
 
-Base2n is for binary-to-text conversion with arbitrary encoding schemes that represent binary data in a base 2<sup>n</sup> notation. It can handle non-standard variants of many standard encoding schemes such as [Base64][base64] and [Base32][base32]. Many binary-to-text encoding schemes use a fixed number of bits of binary data to generate each encoded character. Such schemes generalize to a single algorithm, implemented here.
+Base2n is for binary-to-text conversion with arbitrary encoding schemes that represent binary data in a base 2<sup>n</sup> notation. It can handle non-standard variants of many standard encoding schemes such as [Base64][rfc4648base64] and [Base32][rfc4648base32]. Many binary-to-text encoding schemes use a fixed number of bits of binary data to generate each encoded character. Such schemes generalize to a single algorithm, implemented here.
 
 [rfc4648base64]:    http://tools.ietf.org/html/rfc4648#section-4 "RFC 4648 Base64 Specification"
 [rfc4648base32]:    http://tools.ietf.org/html/rfc4648#section-6 "RFC 4648 Base32 Specification"
@@ -14,6 +14,8 @@ Binary-to-text encoding is usually used to represent data in a notation that is 
 
 Basic Base2n Usage
 ------------------
+
+With Base2n, you define your encoding scheme parametrically. Let's instantiate a [Base32][rfc4648base32] encoder:
 
 ```php
 // RFC 4648 base32 alphabet; case-insensitive
