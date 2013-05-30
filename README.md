@@ -253,11 +253,10 @@ $rawSalt    = $bcrypt64->decode($encodedSalt);   // 16 bytes
 $rawDigest  = $bcrypt64->decode($encodedDigest); // 23 bytes
 
 // Using native functions...
-$bcrypt64alphabet = str_split('./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
-$base64alphabet   = str_split('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/');
-$charmap = array_combine($bcrypt64alphabet, $base64alphabet);
-$rawSalt    = base64_decode(strtr($encodedSalt,   $charmap)); // 16 bytes
-$rawDigest  = base64_decode(strtr($encodedDigest, $charmap)); // 23 bytes
+$bcrypt64alphabet = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+$base64alphabet   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+$rawSalt3    = base64_decode(strtr($encodedSalt,   $bcrypt64alphabet, $base64alphabet)); // 16 bytes
+$rawDigest3  = base64_decode(strtr($encodedDigest, $bcrypt64alphabet, $base64alphabet)); // 23 bytes
 ```
 
 You can encode and decode hexadecimal with <code>[bin2hex()][bin2hex]</code> and <code>[pack()][pack]</code>:
