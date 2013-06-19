@@ -223,7 +223,7 @@ PHP provides the <code>[base64_encode()][base64_encode]</code> and <code>[base64
 [strtr]: http://php.net/strtr "PHP strtr() Function"
 [str_replace]: http://php.net/str_replace "PHP str_replace() Function"
 
-A common variant of Base64 is [modified for URLs and filenames][rfc4648base64url], where <code>+</code> and <code>/</code> are replaced with <code>-</code> and <code>_</code>. It's better to handle this variant with native PHP functions:
+A common variant of Base64 is [modified for URLs and filenames][rfc4648base64url], where <code>+</code> and <code>/</code> are replaced with <code>-</code> and <code>_</code>, and the <code>=</code> padding is omitted. It's better to handle this variant with native PHP functions:
 
 ```php
 // RFC 4648 base64url with Base2n...
@@ -239,7 +239,7 @@ $encoded = str_replace(array('+', '/', '='), array('-', '_', ''), base64_encode(
 [rfc4648base64url]: http://tools.ietf.org/html/rfc4648#page-7 "Modified Base64 for URLs"
 
 
-Native functions are a little more cumbersome when every position in the alphabet has changed:
+Native functions get slightly more cumbersome when every position in the alphabet has changed, as seen in this example of [decoding a Bcrypt hash][bmcf]:
 ```php
 // Decode the salt and digest from a Bcrypt hash
 
@@ -258,6 +258,8 @@ $base64alphabet   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456
 $rawSalt    = base64_decode(strtr($encodedSalt,   $bcrypt64alphabet, $base64alphabet)); // 16 bytes
 $rawDigest  = base64_decode(strtr($encodedDigest, $bcrypt64alphabet, $base64alphabet)); // 23 bytes
 ```
+
+[bmcf]: https://github.com/ademarre/binary-mcf "Binary Modular Crypt Format (BMCF)"
 
 You can encode and decode hexadecimal with <code>[bin2hex()][bin2hex]</code> and <code>[pack()][pack]</code>:
 
