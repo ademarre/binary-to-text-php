@@ -36,6 +36,7 @@ class Base2n extends EncodingAbstract
     const ALPHABET_SYM_BASE64         = '+/';
     const ALPHABET_SYM_BASE64_URL     = '-_';
     const ALPHABET_SYM_BASE64_BCRYPT  = './';
+    const ALPHABET_SYM_BASE64_PHP     = '-,';
 
     const TRANSLATE_CROCKFORD_FROM  = '111100';
     const TRANSLATE_CROCKFORD_TO    = 'iIlLoO';
