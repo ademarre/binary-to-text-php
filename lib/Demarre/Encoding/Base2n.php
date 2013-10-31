@@ -9,6 +9,11 @@
  * @license     http://opensource.org/licenses/MIT  MIT
  */
 
+namespace Demarre\Encoding;
+
+use \InvalidArgumentException;
+use \UnexpectedValueException;
+
 /**
  * Class for binary-to-text encoding with a base of 2^n
  *
@@ -22,16 +27,13 @@
  *
  * @package binary-to-text-php
  */
-class Base2n
+class Base2n extends EncodingAbstract
 {
-    protected $_chars;
     protected $_bitsPerCharacter;
     protected $_radix;
     protected $_rightPadFinalBits;
-    protected $_padFinalGroup;
     protected $_padCharacter;
     protected $_caseSensitive;
-    protected $_charmap;
 
     /**
      * Constructor
@@ -115,12 +117,6 @@ class Base2n
         $this->_caseSensitive     = $caseSensitive;
     }
 
-    /**
-     * Encode a string
-     *
-     * @param   string  $rawString  Binary data to encode
-     * @return  string
-     */
     public function encode($rawString)
     {
         // Unpack string into an array of bytes
@@ -193,8 +189,6 @@ class Base2n
     }
 
     /**
-     * Decode a string
-     *
      * @param   string  $encodedString  Data to decode
      * @param   boolean $strict         Returns NULL if $encodedString contains an undecodable character
      * @return  string
