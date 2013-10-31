@@ -243,12 +243,12 @@ class Base2n extends EncodingAbstract
             return '';
         }
 
-        if ($this->_useNative) {
-            return $this->decodeNative($encodedString);
-        }
-
         if (!empty($this->_translate)) {
             $encodedString = strtr($encodedString, $this->_translate[1], $this->_translate[0]);
+        }
+
+        if ($this->_useNative) {
+            return $this->decodeNative($encodedString);
         }
 
         $chars             = $this->_chars;
@@ -393,10 +393,6 @@ class Base2n extends EncodingAbstract
 
         switch ($this->_bitsPerCharacter) {
             case 6:
-                if (!empty($this->_translate)) {
-                    $rawString = strtr($rawString, $this->_translate[1], $this->_translate[0]);
-                }
-
                 $rawString = base64_decode($encodedString);
                 break;
             case 4:
