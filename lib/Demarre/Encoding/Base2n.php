@@ -29,21 +29,28 @@ use \UnexpectedValueException;
  */
 class Base2n extends EncodingAbstract
 {
+    const PAD_RFC_4648 = '=';
+
+    const NATIVE_SUPPORT = '4,6';
+
     protected $_bitsPerCharacter;
     protected $_radix;
     protected $_rightPadFinalBits;
     protected $_padCharacter;
     protected $_caseSensitive;
+    protected $_useNative;
+    protected $_translate;
 
     /**
      * Constructor
      *
      * @param   integer $bitsPerCharacter   Bits to use for each encoded character
-     * @param   string  $chars              Base character alphabet
+     * @param   string  $chars              Base character alphabet or true to use native alphabet
      * @param   boolean $caseSensitive      To decode in a case-sensitive manner
      * @param   boolean $rightPadFinalBits  How to encode last character
      * @param   boolean $padFinalGroup      Add padding to end of encoded output
      * @param   string  $padCharacter       Character to use for padding
+     * @param   array   $translate          The string translations to apply to native alphabet
      *
      * @throws  InvalidArgumentException    for incompatible parameters
      */
@@ -53,11 +60,27 @@ class Base2n extends EncodingAbstract
         $caseSensitive = true,
         $rightPadFinalBits = false,
         $padFinalGroup = false,
-        $padCharacter = '='
+        $padCharacter = self::PAD_RFC_4648,
+        $translate = array()
     ) {
         // Ensure validity of $bitsPerCharacter
         if (!is_int($bitsPerCharacter)) {
             throw new InvalidArgumentException('$bitsPerCharacter must be an integer');
+        }
+
+        // Check for signature to use native functions
+        if ($chars === true) {
+            // Ensure there is native support for $bitPerCharacter
+            if (!in_array($bitsPerCharacter, explode(',', self::NATIVE_SUPPORT))) {
+                throw new InvalidArgumentException(sprintf('There is no native support for %d bits per character', $bitsPerCharacter));
+            }
+
+            $this->_bitsPerCharacter  = $bitsPerCharacter;
+            $this->_useNative         = true;
+            $this->_rightPadFinalBits = $rightPadFinalBits;
+            $this->_padFinalGroup     = $padFinalGroup;
+            $this->_translate         = $translate;
+            return;
         }
 
         // Ensure validity of $chars
@@ -117,10 +140,16 @@ class Base2n extends EncodingAbstract
         $this->_padFinalGroup     = $padFinalGroup;
         $this->_padCharacter      = $padCharacter[0];
         $this->_caseSensitive     = $caseSensitive;
+        $this->_useNative         = false;
+        $this->_translate         = $translate;
     }
 
     public function encode($rawString)
     {
+        if ($this->_useNative) {
+            return $this->encodeNative($rawString);
+        }
+
         // Unpack string into an array of bytes
         $bytes = unpack('C*', $rawString);
         $byteCount = count($bytes);
@@ -200,6 +229,14 @@ class Base2n extends EncodingAbstract
         if (!$encodedString || !is_string($encodedString)) {
             // Empty string, nothing to decode
             return '';
+        }
+
+        if ($this->_useNative) {
+            return $this->decodeNative($encodedString);
+        }
+
+        if (!empty($this->_translate)) {
+            $encodedString = strtr($encodedString, $this->_translate[1], $this->_translate[0]);
         }
 
         $chars             = $this->_chars;
@@ -289,6 +326,75 @@ class Base2n extends EncodingAbstract
                 // Unable to decode character; abort
                 return null;
             }
+        }
+
+        return $rawString;
+    }
+
+    /**
+     * Encode a string using native PHP functions
+     *
+     * @param   string  $rawString        Binary data to encode
+     * @throws  UnexpectedValueException  for unsupported bits per character
+     * @return  string
+     */
+    protected function encodeNative($rawString)
+    {
+        $encodedString = '';
+
+        switch ($this->_bitsPerCharacter) {
+            case 6:
+                $encodedString = base64_encode($rawString);
+
+                if (!$this->_padFinalGroup) {
+                    $encodedString = rtrim($encodedString, self::PAD_RFC_4648);
+                }
+
+                if (!empty($this->_translate)) {
+                    $encodedString = strtr($encodedString, $this->_translate[0], $this->_translate[1]);
+                }
+
+                break;
+            case 4:
+                $encodedString = bin2hex($rawString);
+                break;
+            default:
+                $message = 'No native function exists to %s %d bits per character';
+                throw new UnexpectedValueException(sprintf($message, 'encode', $this->_bitsPerCharacter));
+        }
+
+        return $encodedString;
+    }
+
+    /**
+     * Decode a string using native PHP functions
+     *
+     * @param   string  $encodedString    Data to decode
+     * @throws  UnexpectedValueException  for unsupported bits per character
+     * @return  string
+     */
+    protected function decodeNative($encodedString)
+    {
+        $rawString = '';
+
+        switch ($this->_bitsPerCharacter) {
+            case 6:
+                if (!empty($this->_translate)) {
+                    $rawString = strtr($rawString, $this->_translate[1], $this->_translate[0]);
+                }
+
+                $rawString = base64_decode($encodedString);
+                break;
+            case 4:
+                if (!function_exists('hex2bin')) {
+                    $rawString = pack('H*', $encodedString);
+                } else {
+                    $rawString = hex2bin($encodedString);
+                }
+                break;
+            default:
+                $message = 'No native function exists to %s %d bits per character';
+                throw new UnexpectedValueException(sprintf($message, 'decode', $this->_bitsPerCharacter));
         }
 
         return $rawString;
