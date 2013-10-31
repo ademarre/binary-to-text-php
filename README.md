@@ -151,7 +151,7 @@ $decoded = $binary->decode($encoded);
 ```
 
 
-PHP uses a both standard and non-standard binary-to-text encoding schemes to generate session identifiers from random hash digests. The most efficient way to store these session IDs in a database is to decode them back to their raw hash digests. PHP's encoding scheme is configured with the </code>[session.hash_bits_per_character][phphashbits]</code> php.ini setting. The decoded size depends on the hash function, set with <code>[session.hash_function][phphash]</code> in php.ini.
+PHP uses a both standard and non-standard binary-to-text encoding schemes to generate session identifiers from random hash digests. The most efficient way to store these session IDs in a database is to decode them back to their raw hash digests. PHP's encoding scheme is configured with the <code>[session.hash_bits_per_character][phphashbits]</code> php.ini setting. The decoded size depends on the hash function, set with <code>[session.hash_function][phphash]</code> in php.ini.
 
 When `session.hash_bits_per_character` is 5, PHP uses the standard Base32 Hex encoding from RFC 4648.
 
