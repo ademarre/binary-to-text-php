@@ -1,33 +1,67 @@
 Binary-to-Text Utilities for PHP
 =================================
 
-For now, the only class in this repository is **Base2n**.
-
-Base2n is for binary-to-text conversion with arbitrary encoding schemes that represent binary data in a base 2<sup>n</sup> notation. It can handle non-standard variants of many standard encoding schemes such as [Base64][rfc4648base64] and [Base32][rfc4648base32]. Many binary-to-text encoding schemes use a fixed number of bits of binary data to generate each encoded character. Such schemes generalize to a single algorithm, implemented here.
-
-[rfc4648base64]:    http://tools.ietf.org/html/rfc4648#section-4 "RFC 4648 Base64 Specification"
-[rfc4648base32]:    http://tools.ietf.org/html/rfc4648#section-6 "RFC 4648 Base32 Specification"
+This library contains classes for encoding/decoding binary/text. These classes are contained in a [PSR-0][psr0] compliant namespace `Demarre\Encoding`.
 
 Binary-to-text encoding is usually used to represent data in a notation that is safe for transport over text-based protocols, and there are several other practical uses. See the examples below.
 
+Library classes include:
+
+- `Base2n` for binary-to-text conversion with arbitrary encoding schemes that represent binary data in a base 2<sup>n</sup> notation.
+- `Base85` for binary-to-text conversion using a general algorithm that encodes 4 bytes of data in 5 characters.
+
+[rfc4648base64]:    http://tools.ietf.org/html/rfc4648#section-4 "RFC 4648 Base64 Specification"
+[rfc4648base32]:    http://tools.ietf.org/html/rfc4648#section-6 "RFC 4648 Base32 Specification"
+[psr0]:             http://www.php-fig.org/psr/psr-0/ "PHP Autoloading Standard"
+[psr0autoloader]:   https://gist.github.com/jwage/221634 "PHP Autoloader Implementation"
 
 
-Basic Base2n Usage
-------------------
 
-With Base2n, you define your encoding scheme parametrically. Let's instantiate a [Base32][rfc4648base32] encoder:
+
+Basic Usage
+-----------
+
+The library comes with a static class for constructing various common/known binary-to-text encoding schemes (`Scheme`), constructed using this class's factory method. By using the factory, you don't have to remember the various alphabets and padding rules for each scheme.
+
+All examples that follow assume you have a [PSR-0][psr0] [autoloader][psr0autoloader] registered with the location of this library.
+
+Let's instantiate a [Base32][rfc4648base32] encoder:
 
 ```php
+use Demarre\Encoding\Scheme;
+
 // RFC 4648 base32 alphabet; case-insensitive
-$base32 = new Base2n(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', FALSE, TRUE, TRUE);
+$base32 = Scheme::factory(Scheme::BASE32);
 $encoded = $base32->encode('encode this');
 // MVXGG33EMUQHI2DJOM======
 ```
 
+The factory supports the following schemes:
 
-### Constructor Parameters
+- `BIN` - [base-2, binary][binary]
+- `OCT` - [base-8, octal][octal]
+- `HEX` - [base-16, hexadecimal][hexadecimal]
+- `BASE32` - [base-32][base32] ([RFC 4648][rfc4648])
+- `BASE32_HEX_RFC_4648` - Alertnative Base32 from [RFC 4648 Section 7][rfc4648base32hex]
+- `BASE32_Z` - Alternative Base32 from [Zooko O'Whielacronx][z32]
+- `BASE32_CROCKFORD` - Alternative Base32 from [Douglas Crockford][crockford32]
+- `BASE64` - [base-64][base64] ([RFC 4648][rfc4648])
+- `BASE64_URL_RFC_4648` - Alternative Base64 for URLs from [RFC 4648 Section 5][rfc4648base64url]
+- `BASE64_BCRYPT` - Alternative Base64 for [bcrypt](https://github.com/ademarre/binary-mcf)
+- `BASE85` - [base-85][base85]
+- `BASE85_Z` - Alternative Base85 from [Pieter Hintjens](http://rfc.zeromq.org/spec:32/Z85)
+- `BASE85_RFC_1924` - Alternative Base85 from [RFC 1924](http://tools.ietf.org/html/rfc1924)
+- `BASE85_BTOA` - Extended Base85 with compression characters z and y
+- `BASE85_ADOBE` - Extended Base85 with compression character z
 
-- <code>integer $bitsPerCharacter</code> **Required**. The number of bits to use for each encoded character; 1–8. The most practical range is 1–6. The encoding's radix is a power of 2: <code>2^$bitsPerCharacter</code>.
+
+### <code>Base2n</code> Class
+
+It can handle non-standard variants of many standard encoding schemes such as [Base64][rfc4648base64] and [Base32][rfc4648base32]. Many binary-to-text encoding schemes use a fixed number of bits of binary data to generate each encoded character. Such schemes generalize to a single algorithm, implemented here.
+
+#### Constructor Parameters
+
+- `integer $bitsPerCharacter` **Required**. The number of bits to use for each encoded character; 1–8. The most practical range is 1–6. The encoding's radix is a power of 2: `2^$bitsPerCharacter`.
     1. [base-2, binary][binary]
     2. [base-4, quaternary][quaternary]
     3. [base-8, octal][octal]
@@ -43,47 +77,55 @@ $encoded = $base32->encode('encode this');
 [hexadecimal]:  http://en.wikipedia.org/wiki/Base16 "Hexadecimal Notation"
 [base32]:       http://en.wikipedia.org/wiki/Base32 "Base32 Encoding"
 [base64]:       http://en.wikipedia.org/wiki/Base64 "Base64 Encoding"
+[z32]:          http://philzimmermann.com/docs/human-oriented-base-32-encoding.txt
+[crockford32]:  http://www.crockford.com/wrmg/base32.html
+[base85]:       http://en.wikipedia.org/wiki/Ascii85 "Base86 Encoding"
+[rfc4648base64url]: http://tools.ietf.org/html/rfc4648#section-5 "Modified Base64 for URLs"
+[rfc4648base32hex]: http://tools.ietf.org/html/rfc4648#section-7 "Modified Base32 with Extended Hex Alphabet"
 
-- <code>string $chars</code> This string specifies the base alphabet. Must be <code>2^$bitsPerCharacter</code> long. Default: <code>0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_</code>
+- `string|boolean $chars` This string specifies the base alphabet. Pass `true` to use native PHP alphabet functions. Must be `2^$bitsPerCharacter` long. Default: `0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_`
 
-- <code>boolean $caseSensitive</code> To decode in a case-sensitive manner. Default: <code>FALSE</code>
+- `boolean $caseSensitive` To decode in a case-sensitive manner. Default: `false`
 
-- <code>boolean $rightPadFinalBits</code> How to encode the last character when the bits remaining are fewer than <code>$bitsPerCharacter</code>. When <code>TRUE</code>, the bits to encode are placed in the most significant position of the final group of bits, with the lower bits set to <code>0</code>. When <code>FALSE</code>, the final bits are placed in the least significant position. For [RFC 4648][rfc4648] encodings, <code>$rightPadFinalBits</code>should be <code>TRUE</code>. Default: <code>FALSE</code>
+- `boolean $rightPadFinalBits` How to encode the last character when the bits remaining are fewer than `$bitsPerCharacter`. When `TRUE`, the bits to encode are placed in the most significant position of the final group of bits, with the lower bits set to `0`. When `FALSE`, the final bits are placed in the least significant position. For [RFC 4648][rfc4648] encodings, `$rightPadFinalBits`should be `true`. Default: `false`
 
 [rfc4648]:  http://tools.ietf.org/html/rfc4648 "RFC 4648: Base16, Base32, Base64"
 
-- <code>boolean $padFinalGroup</code> It's common to encode characters in groups. For example, Base64 (which is based on 6 bits per character) converts 3 raw bytes into 4 encoded characters. If insufficient bytes remain at the end, the final group will be padded with <code>=</code> to complete a group of 4 characters, and the encoded length is always a multiple of 4. Although the information provided by the padding is redundant, some programs rely on it for decoding; Base2n does not. Default: <code>FALSE</code>
+- `boolean $padFinalGroup` It's common to encode characters in groups. For example, Base64 (which is based on 6 bits per character) converts 3 raw bytes into 4 encoded characters. If insufficient bytes remain at the end, the final group will be padded with `=` to complete a group of 4 characters, and the encoded length is always a multiple of 4. Although the information provided by the padding is redundant, some programs rely on it for decoding; Base2n does not. Default: `false`
 
-- <code>string $padCharacter</code> When <code>$padFinalGroup</code> is <code>TRUE</code>, this is the pad character used. Default: <code>=</code>
-
-
-### <code>encode()</code> Parameters
-
-- <code>string $rawString</code> **Required**. The data to be encoded.
+- `string $padCharacter` When `$padFinalGroup` is `true`, this is the pad character used. Default: `=`
 
 
-### <code>decode()</code> Parameters
+#### <code>encode()</code> Parameters
 
-- <code>string $encodedString</code> **Required**. The string to be decoded.
-- <code>boolean $strict</code> When <code>TRUE</code>, <code>NULL</code> will be returned if <code>$encodedString</code> contains an undecodable character. When <code>FALSE</code>, unknown characters are simply ignored. Default: <code>FALSE</code>
+- `string $rawString` **Required**. The data to be encoded.
 
 
+#### <code>decode()</code> Parameters
+
+- `string $encodedString` **Required**. The string to be decoded.
+- `boolean $strict` When `true`, `null` will be returned if `$encodedString` contains an undecodable character. When `false`, unknown characters are simply ignored. Default: `false`
+
+
+### <code>Base85</code> Class
+
+It can handle encoding scheme that are [Base85][base85]. It shares the same `encode()` and `decode()` methods of `Base2n`, but the `decode()` function is always strict (it will return null when decoding invalid input).
 
 Examples
 --------
 
-PHP does not provide any Base32 encoding functions. By setting <code>$bitsPerCharacter</code> to 5 and specifying your desired alphabet in <code>$chars</code>, you can handle any variant of Base32:
+All examples that follow assume you have a [PSR-0][psr0] [autoloader][psr0autoloader] registered with the location of this library.
 
 ```php
 // RFC 4648 base32 alphabet; case-insensitive
-$base32 = new Base2n(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', FALSE, TRUE, TRUE);
+$base32 = Demarre\Encoding\Scheme::factory(Demarre\Encoding\Scheme::BASE32);
 $encoded = $base32->encode('encode this');
 // MVXGG33EMUQHI2DJOM======
 ```
 
 ```php
 // RFC 4648 base32hex alphabet
-$base32hex = new Base2n(5, '0123456789ABCDEFGHIJKLMNOPQRSTUV', FALSE, TRUE, TRUE);
+$base32hex = Demarre\Encoding\Scheme::factory(Demarre\Encoding\Scheme::BASE32_HEX_RFC_4648);
 $encoded = $base32hex->encode('encode this');
 // CLN66RR4CKG78Q39EC======
 ```
@@ -92,7 +134,7 @@ $encoded = $base32hex->encode('encode this');
 Octal notation:
 
 ```php
-$octal = new Base2n(3);
+$octal = Demarre\Encoding\Scheme::factory(Demarre\Encoding\Scheme::OCT);
 $encoded = $octal->encode('encode this');
 // 312671433366214510072150322711
 ```
@@ -101,7 +143,7 @@ $encoded = $octal->encode('encode this');
 A convenient way to go back and forth between binary notation and its real binary representation:
 
 ```php
-$binary = new Base2n(1);
+$binary = Demarre\Encoding\Scheme::factory(Demarre\Encoding\Scheme::BIN);
 $encoded = $binary->encode('encode this');
 // 0110010101101110011000110110111101100100011001010010000001110100011010000110100101110011
 $decoded = $binary->decode($encoded);
@@ -109,7 +151,9 @@ $decoded = $binary->decode($encoded);
 ```
 
 
-PHP uses a proprietary binary-to-text encoding scheme to generate session identifiers from random hash digests. The most efficient way to store these session IDs in a database is to decode them back to their raw hash digests. PHP's encoding scheme is configured with the <code>[session.hash_bits_per_character][phphashbits]</code> php.ini setting. The decoded size depends on the hash function, set with <code>[session.hash_function][phphash]</code> in php.ini.
+PHP uses a both standard and non-standard binary-to-text encoding schemes to generate session identifiers from random hash digests. The most efficient way to store these session IDs in a database is to decode them back to their raw hash digests. PHP's encoding scheme is configured with the </code>[session.hash_bits_per_character][phphashbits]</code> php.ini setting. The decoded size depends on the hash function, set with <code>[session.hash_function][phphash]</code> in php.ini.
+
+When `session.hash_bits_per_character` is 5, PHP uses the standard Base32 Hex encoding from RFC 4648.
 
 ```php
 // session.hash_function = 0
@@ -117,9 +161,11 @@ PHP uses a proprietary binary-to-text encoding scheme to generate session identi
 // 128-bit session ID
 $sessionId = 'q3c8n4vqpq11i0vr6ucmafg1h3';
 // Decodes to 16 bytes
-$phpBase32 = new Base2n(5, '0123456789abcdefghijklmnopqrstuv');
+$phpBase32 = Demarre\Encoding\Scheme::factory(Demarre\Encoding\Scheme::BASE32_HEX_RFC_4648);
 $rawSessionId = $phpBase32->decode($sessionId);
 ```
+
+When `session.hash_bits_per_character` is 6, PHP uses a non-standard Base64 alphabet. You can use the encoding classes to create your own special encoder.
 
 ```php
 // session.hash_function = 1
@@ -127,7 +173,10 @@ $rawSessionId = $phpBase32->decode($sessionId);
 // 160-bit session ID
 $sessionId = '7Hf91mVc,q-9W1VndNNh3evVN83';
 // Decodes to 20 bytes
-$phpBase64 = new Base2n(6, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-,');
+$phpBase64 = new Demarre\Encoding\Base2n(6, true, true, true, false, '', array(
+    Demarre\Encoding\Base2n::ALPHABET_SYM_BASE64,
+    Demarre\Encoding\Base2n::ALPHABET_SYM_BASE64_PHP
+));
 $rawSessionId = $phpBase64->decode($sessionId);
 ```
 
@@ -137,7 +186,10 @@ $rawSessionId = $phpBase64->decode($sessionId);
 
 Generate random security tokens:
 ```php
-$tokenEncoder = new Base2n(6, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-,');
+$tokenEncoder = new Demarre\Encoding\Base2n(6, true, true, true, false, '', array(
+    Demarre\Encoding\Base2n::ALPHABET_SYM_BASE64,
+    Demarre\Encoding\Base2n::ALPHABET_SYM_BASE64_PHP
+));
 $binaryToken = openssl_random_pseudo_bytes(32); // PHP >= 5.3
 $token = $tokenEncoder->encode($binaryToken);
 // Example: U6M132v9FG-AHhBVaQWOg1gjyUi1IogNxuen0i3u3ep
@@ -159,7 +211,7 @@ $base128chars = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0
               . "\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6A\x6B\x6C\x6D\x6E\x6F"
               . "\x70\x71\x72\x73\x74\x75\x76\x77\x78\x69\x7A\x7B\x7C\x7D\x7E\x7F";
 
-$base128 = new Base2n(7, $base128chars);
+$base128 = new Demarre\Encoding\Base2n(7, $base128chars);
 $encoded = $base128->encode('encode this');
 ```
 [7bit]: http://msdn.microsoft.com/en-us/library/ms526290(v=exchg.10).aspx "7bit MIME Content-Transfer-Encoding"
@@ -177,7 +229,7 @@ $high128chars = "\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8A\x8B\x8C\x8D\x8E\x8
               . "\xE0\xE1\xE2\xE3\xE4\xE5\xE6\xE7\xE8\xE9\xEA\xEB\xEC\xED\xEE\xEF"
               . "\xF0\xF1\xF2\xF3\xF4\xF5\xF6\xF7\xF8\xF9\xFA\xFB\xFC\xFD\xFE\xFF";
 
-$high128 = new Base2n(7, $high128chars);
+$high128 = new Demarre\Encoding\Base2n(7, $high128chars);
 $encoded = $high128->encode('encode this');
 ```
 
@@ -188,7 +240,7 @@ Let's create an encoding using exclusively non-printable control characters!
 $noPrintChars = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
               . "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F";
 
-$nonPrintable32 = new Base2n(5, $noPrintChars);
+$nonPrintable32 = new Demarre\Encoding\Base2n(5, $noPrintChars);
 $encoded = $nonPrintable32->encode('encode this');
 ```
 
@@ -198,7 +250,7 @@ Why not encode data using only whitespace? Here's a base-4 encoding using space,
 // Base-4 whitespace encoding
 $whitespaceChars = " \t\n\r";
 
-$whitespace = new Base2n(2, $whitespaceChars);
+$whitespace = new Demarre\Encoding\Base2n(2, $whitespaceChars);
 $encoded = $whitespace->encode('encode this');
 // "\t\n\t\t\t\n\r\n\t\n \r\t\n\r\r\t\n\t \t\n\t\t \n  \t\r\t \t\n\n \t\n\n\t\t\r \r"
 
@@ -210,36 +262,30 @@ $decoded = $whitespace->decode(
 
 
 
-Counterexamples
-----------------
+A Note on Speed
+---------------
 
-Base2n is not slow, but it will never outperform an encoding function implemented in C. When one exists, use it instead.
+Base2n with a custom alphabet is not slow, but it will never outperform an encoding function implemented in C. The Base2n class supports using native PHP functions for encoding/decoding for 4 and 6 bits-per-character by passing `true` as the second argument to its constructor (in place of a custom alphabet). You can also use the native encoding/decoding functions with a custom alphabet by passing the translations as the seventh constructor parameter.
 
+These schemes have already been built into the `Scheme` factory, but are shown here for example.
 
-PHP provides the <code>[base64_encode()][base64_encode]</code> and <code>[base64_decode()][base64_decode]</code> functions, and you should always use them for standard Base64. When you need to use a modified alphabet, you can translate the encoded output with <code>[strtr()][strtr]</code> or <code>[str_replace()][str_replace]</code>.
-
-[base64_encode]: http://php.net/base64_encode "PHP base64_encode() Function"
-[base64_decode]: http://php.net/base64_decode "PHP base64_decode() Function"
-[strtr]: http://php.net/strtr "PHP strtr() Function"
-[str_replace]: http://php.net/str_replace "PHP str_replace() Function"
-
-A common variant of Base64 is [modified for URLs and filenames][rfc4648base64url], where <code>+</code> and <code>/</code> are replaced with <code>-</code> and <code>_</code>, and the <code>=</code> padding is omitted. It's better to handle this variant with native PHP functions:
 
 ```php
 // RFC 4648 base64url with Base2n...
-$base64url = new Base2n(6, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_', TRUE, TRUE, FALSE);
+$base64url = new Demarre\Encoding\Base2n(6, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_', true, true, false);
 $encoded = $base64url->encode("encode this \xBF\xC2\xBF");
 // ZW5jb2RlIHRoaXMgv8K_
 
 // RFC 4648 base64url with native functions...
-$encoded = str_replace(array('+', '/', '='), array('-', '_', ''), base64_encode("encode this \xBF\xC2\xBF"));
+$base64url = new Demarre\Encoding\Base2n(6, true, true, true, false, '', array(
+    Demarre\Encoding\Base2n::ALPHABET_SYM_BASE64,
+    Demarre\Encoding\Base2n::ALPHABET_SYM_BASE64_URL
+));
 // ZW5jb2RlIHRoaXMgv8K_
 ```
 
-[rfc4648base64url]: http://tools.ietf.org/html/rfc4648#page-7 "Modified Base64 for URLs"
 
-
-Native functions get slightly more cumbersome when every position in the alphabet has changed, as seen in this example of [decoding a Bcrypt hash][bmcf]:
+Example of [decoding a Bcrypt hash][bmcf]:
 ```php
 // Decode the salt and digest from a Bcrypt hash
 
@@ -247,33 +293,35 @@ $hash = '$2y$14$i5btSOiulHhaPHPbgNUGdObga/GC.AVG/y5HHY1ra7L0C9dpCaw8u';
 $encodedSalt    = substr($hash, 7, 22);
 $encodedDigest  = substr($hash, 29, 31);
 
-// Using Base2n...
-$bcrypt64 = new Base2n(6, './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', TRUE, TRUE);
+// Using userland Base2n...
+$bcrypt64 = new Base2n(6, './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', true, true);
 $rawSalt    = $bcrypt64->decode($encodedSalt);   // 16 bytes
 $rawDigest  = $bcrypt64->decode($encodedDigest); // 23 bytes
 
-// Using native functions...
-$bcrypt64alphabet = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-$base64alphabet   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-$rawSalt    = base64_decode(strtr($encodedSalt,   $bcrypt64alphabet, $base64alphabet)); // 16 bytes
-$rawDigest  = base64_decode(strtr($encodedDigest, $bcrypt64alphabet, $base64alphabet)); // 23 bytes
+// Using Base2n with native...
+$chars = Demarre\Encoding\EncodingInterface::ALPHABET_ALPHA 
+    . strtolower(Demarre\Encoding\EncodingInterface::ALPHABET_ALPHA)
+    . Demarre\Encoding\EncodingInterface::ALPHABET_NUM;
+$bcrypt64 = new Demarre\Encoding\Base2n(6, true, true, true, false, '', array(
+    $chars . Base2n::ALPHABET_SYM_BASE64,
+    Base2n::ALPHABET_SYM_BASE64_BCRYPT . $chars
+));
+$rawSalt    = $bcrypt64->decode($encodedSalt);   // 16 bytes
+$rawDigest  = $bcrypt64->decode($encodedDigest); // 23 bytes
 ```
 
 [bmcf]: https://github.com/ademarre/binary-mcf "Binary Modular Crypt Format (BMCF)"
 
-You can encode and decode hexadecimal with <code>[bin2hex()][bin2hex]</code> and <code>[pack()][pack]</code>:
+You can encode and decode hexadecimal:
 
 ```php
-// Hexadecimal with Base2n...
-$hexadecimal = new Base2n(4);
+// Hexadecimal with userland Base2n...
+$hexadecimal = new Demarre\Encoding\Base2n(4);
 $encoded = $hexadecimal->encode('encode this'); // 656e636f64652074686973
 $decoded = $hexadecimal->decode($encoded);      // encode this
 
-// It's better to use native functions...
-$encoded = bin2hex('encode this'); // 656e636f64652074686973
-$decoded = pack('H*', $encoded);   // encode this
-// As of PHP 5.4 you can use hex2bin() instead of pack()
+// It's better to use Base2n with native...
+$hexadecimal = new Demarre\Encoding\Base2n(4, true);
+$encoded = $hexadecimal->encode('encode this'); // 656e636f64652074686973
+$decoded = $hexadecimal->decode($encoded);      // encode this
 ```
-
-[bin2hex]:  http://php.net/bin2hex  "PHP bin2hex() Function"
-[pack]:     http://php.net/pack     "PHP pack() Function"
