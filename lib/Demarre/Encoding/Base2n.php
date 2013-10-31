@@ -226,7 +226,7 @@ class Base2n extends EncodingAbstract
      */
     public function decode($encodedString, $strict = false)
     {
-        if (!$encodedString || !is_string($encodedString)) {
+        if (!is_string($encodedString) || !strlen($encodedString)) {
             // Empty string, nothing to decode
             return '';
         }
