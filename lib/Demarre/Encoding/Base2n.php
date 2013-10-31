@@ -55,6 +55,10 @@ class Base2n extends EncodingAbstract
         $padFinalGroup = false,
         $padCharacter = '='
     ) {
+        // Ensure validity of $bitsPerCharacter
+        if (!is_int($bitsPerCharacter)) {
+            throw new InvalidArgumentException('$bitsPerCharacter must be an integer');
+        }
 
         // Ensure validity of $chars
         if (!is_string($chars) || ($charLength = strlen($chars)) < 2) {
@@ -76,11 +80,6 @@ class Base2n extends EncodingAbstract
             if ($padCharFound !== false) {
                 throw new InvalidArgumentException('$padCharacter can not be a member of $chars');
             }
-        }
-
-        // Ensure validity of $bitsPerCharacter
-        if (!is_int($bitsPerCharacter)) {
-            throw new InvalidArgumentException('$bitsPerCharacter must be an integer');
         }
 
         if ($bitsPerCharacter < 1) {
