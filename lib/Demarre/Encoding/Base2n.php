@@ -3,8 +3,9 @@
  * Binary-to-text PHP Utilities
  *
  * @package     binary-to-text-php
- * @link        https://github.com/ademarre/binary-to-text-php
+ * @link        https://github.com/kabel/binary-to-text-php
  * @author      Andre DeMarre
+ * @author      Kevin Abel
  * @copyright   2009-2013 Andre DeMarre
  * @license     http://opensource.org/licenses/MIT  MIT
  */
