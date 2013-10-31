@@ -50,9 +50,12 @@ class Base2n extends EncodingAbstract
     public function __construct(
         $bitsPerCharacter,
         $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_',
-        $caseSensitive = TRUE, $rightPadFinalBits = FALSE,
-        $padFinalGroup = FALSE, $padCharacter = '=')
-    {
+        $caseSensitive = true,
+        $rightPadFinalBits = false,
+        $padFinalGroup = false,
+        $padCharacter = '='
+    ) {
+
         // Ensure validity of $chars
         if (!is_string($chars) || ($charLength = strlen($chars)) < 2) {
             throw new InvalidArgumentException('$chars must be a string of at least two characters');
@@ -70,7 +73,7 @@ class Base2n extends EncodingAbstract
                 $padCharFound = stripos($chars, $padCharacter[0]);
             }
 
-            if ($padCharFound !== FALSE) {
+            if ($padCharFound !== false) {
                 throw new InvalidArgumentException('$padCharacter can not be a member of $chars');
             }
         }
@@ -190,10 +193,10 @@ class Base2n extends EncodingAbstract
 
     /**
      * @param   string  $encodedString  Data to decode
-     * @param   boolean $strict         Returns NULL if $encodedString contains an undecodable character
+     * @param   boolean $strict         Returns null if $encodedString contains an undecodable character
      * @return  string
      */
-    public function decode($encodedString, $strict = FALSE)
+    public function decode($encodedString, $strict = false)
     {
         if (!$encodedString || !is_string($encodedString)) {
             // Empty string, nothing to decode
@@ -211,7 +214,6 @@ class Base2n extends EncodingAbstract
         // Get index of encoded characters
         if ($this->_charmap) {
             $charmap = $this->_charmap;
-
         } else {
             $charmap = array();
 
@@ -286,7 +288,7 @@ class Base2n extends EncodingAbstract
 
             } elseif ($strict) {
                 // Unable to decode character; abort
-                return NULL;
+                return null;
             }
         }
 
