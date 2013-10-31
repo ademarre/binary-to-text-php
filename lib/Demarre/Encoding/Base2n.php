@@ -29,6 +29,16 @@ use \UnexpectedValueException;
  */
 class Base2n extends EncodingAbstract
 {
+    const ALPHABET_Z                  = 'ybndrfg8ejkmcpqxot1uwisza345h769';
+    const ALPHABET_CROCKFORD_EXLC     = 'ILOU';
+
+    const ALPHABET_SYM_BASE64         = '+/';
+    const ALPHABET_SYM_BASE64_URL     = '-_';
+    const ALPHABET_SYM_BASE64_BCRYPT  = './';
+
+    const TRANSLATE_CROCKFORD_FROM  = '111100';
+    const TRANSLATE_CROCKFORD_TO    = 'iIlLoO';
+
     const PAD_RFC_4648 = '=';
 
     const NATIVE_SUPPORT = '4,6';
