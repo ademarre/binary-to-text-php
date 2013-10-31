@@ -280,11 +280,13 @@ class Base2n extends EncodingAbstract
 
             if (!isset($charmap[$encodedString[$c]]) && !$caseSensitive) {
                 // Encoded character was not found; try other case
-                if (isset($charmap[$cUpper = strtoupper($encodedString[$c])])) {
-                    $charmap[$encodedString[$c]] = $charmap[$cUpper];
+                $cAlt = strtoupper($encodedString[$c]);
+                if ($cAlt == $encodedString[$c]) {
+                	$cAlt = strtolower($encodedString[$c]);
+                }
 
-                } elseif (isset($charmap[$cLower = strtolower($encodedString[$c])])) {
-                    $charmap[$encodedString[$c]] = $charmap[$cLower];
+                if (isset($charmap[$cAlt])) {
+                    $charmap[$encodedString[$c]] = $charmap[$cAlt];
                 }
             }
 
