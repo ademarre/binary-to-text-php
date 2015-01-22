@@ -1,0 +1,16 @@
+{
+	"name": "ademarre/binary-to-text-php",
+	"description": "Collection of binary-to-text encdoing utilities for PHP. Includes Base32 support and much more.",
+	"keywords": [ "base32" ],
+	"homepage": "https://github.com/ademarre/binary-to-text-php",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Andre DeMarre",
+			"role": "Developer"
+		}
+	],
+	"autoload": {
+		"psr-0": { "Base2n": "" }
+	}
+}
