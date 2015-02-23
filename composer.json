@@ -1,6 +1,6 @@
 {
     "name": "ademarre/binary-to-text-php",
-    "description": "Collection of binary-to-text encdoing utilities for PHP. Includes Base32 support and much more.",
+    "description": "Collection of binary-to-text encoding utilities for PHP. Includes Base32 support and much more.",
     "keywords": ["rfc4648", "base32", "octal", "base-8", "base-4", "binary"],
     "type": "library",
     "homepage": "https://github.com/ademarre/binary-to-text-php",
@@ -12,7 +12,7 @@
         }
     ],
     "require": {
-        "php": ">=5.3.3"
+        "php": ">=5.2.14"
     },
     "autoload": {
         "psr-0": { "Base2n": "" }
