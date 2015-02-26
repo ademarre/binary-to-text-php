@@ -130,7 +130,8 @@ class Base2n
         $encodedString = '';
         $byte = array_shift($bytes);
         $bitsRead = 0;
-
+        $oldBits = 0;
+        
         $chars             = $this->_chars;
         $bitsPerCharacter  = $this->_bitsPerCharacter;
         $rightPadFinalBits = $this->_rightPadFinalBits;
@@ -233,7 +234,7 @@ class Base2n
 
         // Remove trailing padding characters
         if ($padFinalGroup) {
-            while ($encodedString[$lastNotatedIndex] == $padCharacter) {
+            while ($encodedString[$lastNotatedIndex] === $padCharacter) {
                 $encodedString = substr($encodedString, 0, $lastNotatedIndex);
                 $lastNotatedIndex--;
             }
@@ -246,7 +247,7 @@ class Base2n
         // Convert each encoded character to a series of unencoded bits
         for ($c = 0; $c <= $lastNotatedIndex; $c++) {
 
-            if (!isset($charmap[$encodedString[$c]]) && !$caseSensitive) {
+            if (!$caseSensitive && !isset($charmap[$encodedString[$c]])) {
                 // Encoded character was not found; try other case
                 if (isset($charmap[$cUpper = strtoupper($encodedString[$c])])) {
                     $charmap[$encodedString[$c]] = $charmap[$cUpper];
@@ -266,7 +267,7 @@ class Base2n
                     $newBits = $charmap[$encodedString[$c]] << $bitsNeeded - $bitsPerCharacter;
                     $bitsWritten += $bitsPerCharacter;
 
-                } elseif ($c != $lastNotatedIndex || $rightPadFinalBits) {
+                } elseif ($c !== $lastNotatedIndex || $rightPadFinalBits) {
                     // Zero or more too many bits to complete a byte; shift right
                     $newBits = $charmap[$encodedString[$c]] >> $unusedBitCount;
                     $bitsWritten = 8; //$bitsWritten += $bitsNeeded;
@@ -279,11 +280,11 @@ class Base2n
 
                 $byte |= $newBits;
 
-                if ($bitsWritten == 8 || $c == $lastNotatedIndex) {
+                if ($bitsWritten === 8 || $c === $lastNotatedIndex) {
                     // Byte is ready to be written
                     $rawString .= pack('C', $byte);
 
-                    if ($c != $lastNotatedIndex) {
+                    if ($c !== $lastNotatedIndex) {
                         // Start the next byte
                         $bitsWritten = $unusedBitCount;
                         $byte = ($charmap[$encodedString[$c]] ^ ($newBits << $unusedBitCount)) << 8 - $bitsWritten;
