@@ -12,12 +12,12 @@
 /**
  * Class for binary-to-text encoding with a base of 2^n
  *
- * The Base2n class is for binary-to-text conversion. It employs a 
- * generalization of the algorithms used by many encoding schemes that 
- * use a fixed number of bits to encode each character. In other words, 
+ * The Base2n class is for binary-to-text conversion. It employs a
+ * generalization of the algorithms used by many encoding schemes that
+ * use a fixed number of bits to encode each character. In other words,
  * the base is a power of 2.
  *
- * Earlier versions of this class were named 
+ * Earlier versions of this class were named
  * FixedBitNotation and FixedBitEncoding.
  *
  * @package binary-to-text-php
@@ -46,9 +46,9 @@ class Base2n
      * @throws  InvalidArgumentException    for incompatible parameters
      */
     public function __construct(
-        $bitsPerCharacter, 
-        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_', 
-        $caseSensitive = TRUE, $rightPadFinalBits = FALSE, 
+        $bitsPerCharacter,
+        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_',
+        $caseSensitive = TRUE, $rightPadFinalBits = FALSE,
         $padFinalGroup = FALSE, $padCharacter = '=')
     {
         // Ensure validity of $chars
@@ -94,8 +94,8 @@ class Base2n
 
             $radix >>= 1;
             throw new InvalidArgumentException(
-                    '$bitsPerCharacter can not be more than ' . $bitsPerCharacter 
-                  . ' given $chars length of ' . $charLength 
+                    '$bitsPerCharacter can not be more than ' . $bitsPerCharacter
+                  . ' given $chars length of ' . $charLength
                   . ' (max radix ' . $radix . ')');
 
         } elseif ($bitsPerCharacter > 8) {
@@ -131,7 +131,7 @@ class Base2n
         $byte = array_shift($bytes);
         $bitsRead = 0;
         $oldBits = 0;
-        
+
         $chars             = $this->_chars;
         $bitsPerCharacter  = $this->_bitsPerCharacter;
         $rightPadFinalBits = $this->_rightPadFinalBits;
